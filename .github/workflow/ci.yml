@@ -1,0 +1,72 @@
+﻿# Tên của workflow, sẽ hiển thị trong tab Actions của GitHub
+name: Node.js CI
+
+# Kiểm soát thời điểm workflow sẽ chạy
+on:
+  # Chạy khi có push lên nhánh main
+  push:
+    branches: [ "main" ]
+  # Chạy khi có pull request nhắm vào nhánh main
+  pull_request:
+    branches: [ "main" ]
+
+# Một workflow chạy bao gồm một hoặc nhiều jobs
+jobs:
+  # Job này có tên là "build-and-test"
+  build-and-test:
+    # Môi trường máy ảo để chạy job
+    runs-on: ubuntu-latest
+
+    # Các bước đại diện cho một chuỗi các tác vụ sẽ được thực thi
+    steps:
+      # Bước 1: Check out code từ repository về máy ảo
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Chỉ định phiên bản Node.js LTS
+          cache: 'npm' # Kích hoạt caching cho các gói npm để tăng tốc độ
+
+      # Bước 3: Cài đặt các dependencies
+      - name: Install dependencies
+        # Sử dụng 'npm ci' thay vì 'npm install' cho CI
+        # 'ci' nhanh hơn và đảm bảo cài đặt đúng các phiên bản trong package-lock.json
+        run: npm ci
+
+      # Bước 4: Chạy script lint (từ package.json)
+      - name: Run linter
+        run: npm run lint
+
+      # Bước 5: Chạy script test và tạo báo cáo coverage
+      - name: Run tests with coverage
+        # Giả định script 'test' của bạn hỗ trợ cờ '--coverage'
+        # Điều này thường tạo ra một thư mục 'coverage/'
+        run: npm run test -- --coverage
+
+      # Bước 6: Chạy script build (từ package.json)
+      - name: Build project
+        # Bước này sẽ chạy script 'build' của bạn,
+        # thường tạo ra thư mục 'build/' hoặc 'dist/'
+        run: npm run build
+
+      # Bước 7: Upload artifact báo cáo coverage
+      # Artifact này sẽ có sẵn để tải về từ trang run của Actions
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report # Tên của artifact
+          path: coverage/ # Thư mục chứa báo cáo coverage
+          if-no-files-found: warn # Cảnh báo nếu không tìm thấy thư mục
+
+      # Bước 8: Upload artifact build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact # Tên của artifact
+          path: | # Upload nhiều thư mục nếu cần
+            build/
+            dist/
+          if-no-files-found: warn # Cảnh báo nếu không tìm thấy thư mục

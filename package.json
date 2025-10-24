@@ -1,0 +1,21 @@
+{
+  "name": "my-node-project",
+  "version": "1.0.0",
+  "description": "Một dự án Node.js mẫu để chạy CI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint .",
+    "test": "jest",
+    "build": "echo \"Không có bước build thực sự, tạo thư mục rỗng...\" && mkdirp build dist"
+  },
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "mkdirp": "^3.0.1"
+  },
+  "dependencies": {}
+}
+
